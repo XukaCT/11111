@@ -3,9 +3,9 @@
 A 60-day supermarket simulation with autonomous inventory decisions, persistent operating history and commercial reporting.
 
 **Subject:** CSE3CWA / CSE5006, Assignment 4  
-**Author:** Sang Nguyen 
-**Student ID:** 22261623 
-**Submitted Run ID:** [ACTUAL RUN ID]
+**Author:** Sang Nguyen<br/>
+**Student ID:** 22261623<br/>
+**Submitted Run ID:** 1
 
 ## Purpose and scope
 
@@ -259,23 +259,5 @@ I remain responsible for understanding the submitted code, reviewing and validat
 
 Passing Assurance supports internal consistency within the checks performed. It does not demonstrate real-world predictive accuracy or prove that a recommendation is optimal.
 
-## Clean-copy verification and packaging
-
-Before submitting, extract a fresh copy of the final ZIP and perform these checks:
-
-- [ ] Run the exact installation/startup commands in this README.
-- [ ] Confirm the Submitted Run loads without seeding.
-- [ ] Confirm its Run ID and 60/60 retained days.
-- [ ] Inspect the Model Declaration and all four acceptance areas.
-- [ ] Open a Daily Report, transactions and product/Store Brain evidence.
-- [ ] Check actual inventory, revenue and cash Assurance results.
-- [ ] Create an additional run and confirm the original history remains intact.
-- [ ] Restart the application and confirm saved evidence persists.
-- [ ] Confirm that no normal workflow edits or deletes completed history.
-- [ ] Replace all README placeholders and remove preparation-only notes.
-
-Include the source, dependency manifests/lockfiles, README, catalogue and SQLite database containing the Submitted Run. Exclude `node_modules`, build output, temporary files and secrets.
-
-Close processes using SQLite before packaging. If `supermarket.db-wal` or `supermarket.db-shm` remains, verify that the database has been safely checkpointed and the main `.db` contains the complete run before omitting these files; do not simply delete a live WAL file.
 
 Submit the source-code ZIP and the required 4–8 minute MP4 directly to the LMS. The website contains the required reports; this README and the video do not replace missing application evidence.
