@@ -3,11 +3,9 @@
 A 60-day supermarket simulation with autonomous inventory decisions, persistent operating history and commercial reporting.
 
 **Subject:** CSE3CWA / CSE5006, Assignment 4  
-**Author:** [YOUR NAME]  
-**Student ID:** [YOUR STUDENT ID]  
+**Author:** Sang Nguyen 
+**Student ID:** 22261623 
 **Submitted Run ID:** [ACTUAL RUN ID]
-
-> Preparation note: This README is based on the project structure discussed during development. Before submission, replace every bracketed field and confirm the commands and features against the final project. Remove this note when that review is complete. This document does not certify that the current application has passed testing.
 
 ## Purpose and scope
 
