@@ -1,98 +1,283 @@
-# SmartFarm Dashboard
+# Autonomous Supermarket
 
-This project is a full-stack dashboard for monitoring agricultural sensor data against user-configured Crop Cards. It uses a React frontend and an Express/SQLite backend.
+A 60-day supermarket simulation with autonomous inventory decisions, persistent operating history and commercial reporting.
 
-## I. Setup and Execution
+**Subject:** CSE3CWA / CSE5006, Assignment 4  
+**Author:** [YOUR NAME]  
+**Student ID:** [YOUR STUDENT ID]  
+**Submitted Run ID:** [ACTUAL RUN ID]
 
-**Prerequisites:** Node.js (v18+) and npm installed.
+> Preparation note: This README is based on the project structure discussed during development. Before submission, replace every bracketed field and confirm the commands and features against the final project. Remove this note when that review is complete. This document does not certify that the current application has passed testing.
 
-**1. Backend Installation & Run**
-+ Navigate to the backend directory: `cd smartfarm` and `cd backend`
-+ Install dependencies: `npm install`
-+ Start the server: `node server.js`
+## Purpose and scope
 
-**2. Frontend Installation & Run**
-+ Open a new terminal and navigate to the frontend directory: `cd smartfarm` and `cd frontend`
-+ Install dependencies: `npm install`
-+ Start the Vite development server: `npm run dev`
+The project models a small autonomous supermarket near Swanston Street and Melbourne Town Hall in Melbourne. It generates customer demand, records valid purchases, tracks stock and expiry, and uses a rule-based Store Brain to place affordable replenishment orders.
 
-## II. Architecture & Networking
+The website lets a remote manager inspect one complete 60-day run, its business results, daily operating evidence and integrity checks. It is an educational prototype, not a validated forecast of a real supermarket's performance.
 
-**1. Base URLs**
-*   **Frontend UI:** `http://localhost:5173`
-*   **Backend API:** `http://localhost:3001`
+## Technology and prerequisites
 
-**2. API Routes**
+| Component | Technology |
+|---|---|
+| Frontend | React with Vite |
+| Backend | Node.js with Express |
+| Persistent storage | SQLite |
+| Backend SQLite driver | `better-sqlite3` |
+| Catalogue input | `backend/products.json` |
 
-| Method | Route | Description |
-| :--- | :--- | :--- |
-| `GET` | `/api/crops` | Fetch all configured Crop Cards from SQLite |
-| `POST` | `/api/crops` | Create a new Crop Card |
-| `PUT` | `/api/crops/:id` | Update an existing Crop Card |
-| `DELETE` | `/api/crops/:id` | Delete a Crop Card |
-| `GET` | `/api/readings` | Fetch external sensor JSON data |
+Tested environment:
 
-**3. Error Format**
-All API errors return a standard JSON object containing a single `error` property and an appropriate HTTP status code (e.g., 400, 404, 500).
-```json
-{
-  "error": "Detailed error message describing the failure."
-}
+- **Operating system:** [OS AND VERSION USED FOR THE CLEAN-COPY TEST].
+- **Node.js:** [EXACT TESTED VERSION FROM `node --version`].
+- **npm:** [EXACT TESTED VERSION FROM `npm --version`].
+- **Browser:** [BROWSER AND VERSION USED FOR TESTING].
+
+Use the tested Node.js version above because the SQLite driver includes a native dependency. Install dependencies from each folder's `package.json`; include existing lockfiles in the submission.
+
+**Environment variables:** [CONFIRM WHETHER NONE ARE REQUIRED FOR THE DEFAULT LOCAL SETUP]. The intended default backend address is `http://localhost:3000`. The frontend API helper supports `VITE_API_URL`; if overriding the address, follow the base-URL format used by `frontend/src/api.js`.
+
+## Installation and startup
+
+Extract the project ZIP to a local folder. The commands below assume the root contains folders named `backend` and `frontend`; adjust these instructions before submission if the actual names differ.
+
+### Start the backend
+
+Open a terminal in the extracted project root:
+
+```sh
+cd backend
+npm install
+npm start
 ```
-## III. Data Management & Logic
 
-**1. Database Creation and Seeding**
+The backend should listen at:
 
-The backend uses SQLite (`database.sqlite`). Upon the first server startup, it automatically creates the crops table if it does not exist. A startup script automatically seeds it with initial default thresholds for standard `crops` ( Tomato, Lettuce, Wheat) to ensure a functional dashboard immediately upon launch.
+```text
+http://localhost:3000
+```
 
-**2. Data Ownerships**
-+ SQLite Database: Owns and persists user-configured target thresholds, normal water recommendations, locations, and notes.
-+ Sensor JSON: Acts as an external, read-only data feed providing current environmental conditions.
-+ React State: Owns the combined analysis logic, merging database thresholds with external sensor data on the fly.
+Keep this terminal open while using the application.
 
-**3. Crop Name Matching**
+### Start the frontend
 
-Data from the sensor feed is mapped to Crop Cards using exact, case-sensitive string matching on the `crop_name` field. If a sensor reading's `crop_name` does not exactly match a database record, it is ignored by that specific card.
+Open a second terminal in the extracted project root:
 
-**4. Latest-Timestamp Selection**
+```sh
+cd frontend
+npm install
+npm run dev
+```
 
-Multiple readings for the same crop are filtered by first extracting all matches, then applying a string-based descending sort (`localeCompare`) on the ISO 8601 `timestamp` field. Index `0` of the sorted array is selected as the definitive latest reading.
+Open the local URL printed by Vite.
 
-**5. Dashboard Decision Priority**
-The analysis engine evaluates the latest reading against the Crop Card using a strict top-down hierarchy. The first matching condition halts further checks:
-+ Sensor Problem: `sensor_status` is 'Offline' or 'Faulty'.
-+ Invalid Data: Numeric values fall outside physically possible bounds (moisture < 0 or > 100, etc.).
-+ Dry: `soil_moisture` < `target_mi`n. (Triggers "Water crop").
-+ Healthy: `soil_moisture` is between `target_min` and `target_max` inclusive.
-+ Too Wet: `soil_moisture` > `target_max`. (Triggers "Stop watering").
+**Frontend URL used in the final clean-copy test:** [INSERT THE ACTUAL URL].
 
-! Note: High temperature (>35°C) and Rainfall (>=5mm) are evaluated independently as supplementary Alerts for valid, online readings, appending to the condition rather than overwriting it.
+The frontend connects to the backend and loads the saved Submitted Run. Both processes must remain running; use `Ctrl+C` in each terminal to stop them.
 
+**The marker must not need to run `npm run seed`.** The submitted SQLite database must already contain the completed Submitted Run and its history.
 
-## IV. Development & AI Context
+### If startup fails
 
-**2. Checks and Corrections to Sensor JSON**
+- **Missing `products.json`:** Confirm the file is in `backend/`, alongside `package.json`, rather than in `src/`. It supplies the catalogue when creating a run.
+- **Frontend cannot reach the API:** Confirm the backend is running on the configured address and inspect the displayed error. Check `frontend/src/api.js` and any local API URL override.
+- **Port already in use:** Stop the other process using the port, or make a documented port change and update the frontend connection accordingly.
+- **SQLite dependency installation fails:** Confirm that Node.js matches the tested version above and inspect the full `npm install` error.
+- **Submitted Run is missing:** Check that the supplied `backend/supermarket.db` was included and is the correct file. Do not delete it or regenerate evidence as a routine startup step.
 
-+ Verified that timestamps conformed strictly to YYYY-MM-DDTHH:mm:ss for reliable string sorting.
-+ Ensured the "out-of-range" numeric value (e.g., temperature 999) was applied to an older reading so it wouldn't disrupt the specific required state of the latest readings.
-+ Confirmed the array length was exactly 20 objects, with an even distribution of 5 per crop type.
+## Database and simulation runs
 
-**3. AI Use Statement**
-+ Which tool: Google Gemini.
-+ Final AI Prompt for Sensor Data:
-"Generate a valid JSON array containing exactly 20 simulated SmartFarm sensor readings. Use these crop_name values exactly and create exactly 5 readings for each: Tomato, Lettuce, Wheat, Maize. Every object must contain exactly these fields: crop_name, timestamp, soil_moisture, temperature, rainfall, sensor_status, notes. Use timestamps in YYYY-MM-DDTHH:mm:ss format. Timestamps must be distinct within each crop. The same timestamp may be used by different crops. Mix the array order so the latest reading is not always the last object. Use sensor_status only as Online, Offline or Faulty. Most numeric values must be realistic: soil_moisture 0-100, temperature 0-50, rainfall 0-50. Include exactly one structurally valid older reading with one deliberately out-of-range numeric value. That invalid reading must not be the latest reading for its crop. Make the latest readings produce these cases with the default Crop Card settings: - latest Tomato: Online, Dry, temperature above 35 C; - latest Lettuce: Online and Healthy; - latest Wheat: Online, Too Wet, rainfall at least 5 mm; - latest Maize: sensor_status Faulty. Return only the JSON array. Do not use Markdown or explanation."
-+ Problem found and corrected in AI-generated data:  
-When the AI generated the 20 sensor readings, it struggled to align the chronological timestamps with the assignment's dashboard requirements. For example, it correctly created a Tomato reading with a temperature of 38°C (to trigger the "High temperature" alert), but it assigned that reading a timestamp of `10:00:00`. It then generated a normal, healthy Tomato reading with a timestamp of `14:00:00`. Because my application correctly selects the reading with the *greatest* timestamp, the dashboard displayed the healthy reading instead of the required hot/dry scenario. I corrected this by manually editing the JSON timestamps to guarantee that the specific objects containing the required assignment states (Tomato hot/dry, Maize faulty, Wheat rain) mathematically held the latest chronological timestamp for their respective crops.
-+ How crop_name uniqueness and exact matching were verified:
-  *   **Uniqueness:** I verified that the JSON data contained no typos or duplicate crop entries by passing the extracted names through a JavaScript `Set` (`[...new Set(readings.map(r => r.crop_name))]`). Because a `Set` only stores unique values, this confirmed the data cleanly contained exactly 4 unique crops (Tomato, Lettuce, Wheat, Maize).
-  *   **Exact Matching:** I verified exact matching in the frontend filtering logic (`getAvailableCropNames` and `analyseCrop`). I used the strict equality operator when comparing the sensor feed to the database (`r.crop_name === cropName`). This guarantees a case-sensitive, perfect match, ensuring data is never accidentally applied to the wrong Crop Card.
-+ How the greatest timestamp and required latest cases were verified
-  *   **Greatest Timestamp:** I verified this programmatically. Because the JSON timestamps are in strict `YYYY-MM-DDTHH:mm:ss` format, I used a descending string sort (`b.timestamp.localeCompare(a.timestamp)`). This mathematically guarantees that the chronologically newest reading will always end up at index `[0]`.
-  *   **Required Latest Cases:** To verify that the specific required scenarios (e.g., Tomato = Dry/High Temp) actually worked, I performed a visual UI test. I ran the backend with the default Crop Card thresholds seeded in SQLite, loaded the JSON sensor feed, and visually confirmed on the React dashboard that the correct alerts and conditions were rendered for the latest reading of each respective crop.
-+ Implementation Decision Explained:
-  *   **Decision:** I chose to derive the final dashboard analysis (the condition, recommended water, and alerts) dynamically on the fly during the React render cycle, rather than storing those calculated results in a separate React state variable or saving them to the SQLite database.
-  *   **Explanation:** The dashboard relies on two completely separate, changing data sources: user-editable Crop Cards from SQLite and an external JSON sensor feed. If I stored the calculated condition (e.g., "Dry") in the database or its own state variable, it would instantly become stale the second a user edited their moisture thresholds or the sensor feed refreshed. By computing the dashboard results dynamically (`const dashboardResults = crops.map(...)`) immediately before rendering, I guarantee the UI always displays the exact, real-time intersection of the user's latest rules and the newest sensor data, entirely avoiding state-mismatch bugs.
-      
-**4. Project Limitation**
+### Submitted Run
 
-The application relies on HTTP polling (manual "Refresh" button) to fetch updated readings. It does not use WebSockets, meaning critical alerts (like a sudden temperature spike) are not pushed to the client in real time.
+The primary database is:
+
+```text
+backend/supermarket.db
+```
+
+**Submitted Run ID:** [ACTUAL RUN ID]  
+**Completion status:** [CONFIRM COMPLETED, WITH 60/60 DAYS RETAINED]  
+**Assurance result:** [ACTUAL RESULT; IDENTIFY ANY UNRESOLVED EXCEPTIONS]
+
+The intended startup workflow automatically selects the Submitted Run. It is also identifiable in **Setup & Runs**.
+
+All four report parts, Daily Reports, Model Declaration and Assurance must refer to this same run when inspecting the submitted evidence. The database is the primary store; JSON is only catalogue input and is not a substitute for historical records.
+
+### Create an additional run
+
+1. Open **Setup & Runs**.
+2. Select **Start new 60-day run**.
+3. Wait for completion, then select the resulting Run ID.
+4. Inspect the new run's report and Assurance results.
+5. Select the Submitted Run again to return to the assessed evidence.
+
+A new run must receive a separate identity and preserve existing run history. Starting another run is not intended to replace the Submitted Run automatically.
+
+Model inputs are maintained in `backend/products.json` and `backend/src/config.js`. Changes must apply to a new run rather than alter a run that has already begun. The website's reports should use the selected run's frozen settings, not the latest files.
+
+### Developer-only seed command
+
+For initial preparation in a separate development copy with a fresh database:
+
+```sh
+cd backend
+npm run seed
+```
+
+The intended seed script creates a 60-day run, checks its Assurance results and designates it as the Submitted Run only if those checks pass. Confirm the script's actual output and behaviour before packaging the project.
+
+This command prepares submission evidence; it is not a required marker installation step. Back up existing databases before maintenance and do not delete or overwrite the final submitted database to rerun a seed command.
+
+## Architecture and data flow
+
+```text
+products.json + config.js
+           |
+           v
+Create a run and save its configuration snapshot
+           |
+           v
+demand.js -> engine.js <-> storeBrain.js
+           |
+           v
+SQLite: customers, transactions, inventory, orders,
+        expiry, cash, daily results and decisions
+           |
+           v
+Report and Assurance services -> Express API -> React website
+```
+
+Configuration describes the model. Historical records describe what occurred, while report services derive figures from the selected run's stored history.
+
+| File or folder | Responsibility |
+|---|---|
+| `backend/src/server.js` | Start Express and attach API routes |
+| `backend/src/db.js` | Open SQLite and initialise database protections |
+| `backend/src/schema.sql` | Define tables and relationships |
+| `backend/src/config.js` | Define model parameters and fixed constraints |
+| `backend/src/rng.js` | Supply seeded pseudo-random generation |
+| `backend/src/routes/runs.js` | Expose run, report and evidence endpoints |
+| `backend/src/services/runs.js` | Validate inputs and create run snapshots |
+| `backend/src/simulation/demand.js` | Generate customer activity and requested baskets |
+| `backend/src/simulation/engine.js` | Execute the daily cycle and save operating history |
+| `backend/src/simulation/storeBrain.js` | Evaluate conditions and decide replenishment |
+| `backend/src/services/reports.js` | Query summary, daily and product evidence |
+| `backend/src/services/assurance.js` | Reconcile stored inventory, revenue and cash |
+| `backend/src/services/declaration.js` | Describe the saved run's model |
+| `backend/scripts/seed-submitted-run.js` | Prepare the Submitted Run in development |
+| `frontend/src/api.js` | Make backend API requests |
+| `frontend/src/components/` | Render setup, declaration, reports, daily evidence and Assurance |
+| `frontend/src/components/findings.js` | Build structured findings from report data |
+
+Completed-run configuration and historical records are intended to be protected against editing or deletion through normal application workflows. A modelling or implementation change requires a new run, not revision of old evidence.
+
+## Customer and demand model
+
+The proposed model distinguishes commuter, office-lunch, top-up and household shopping missions. Mission mix, basket behaviour, category preferences, time-of-day patterns and weekday/weekend differences create structured demand, with product popularity weights providing further variation.
+
+Only catalogue products can be purchased. Actual sales are limited to available unexpired stock, and each completed purchase records its items and revenue and updates inventory and cash.
+
+A stored random seed supports repeatable testing with unchanged inputs and code. It is separate from the `npm run seed` database-preparation command, and exact deterministic replay is not an assignment requirement.
+
+**Final implementation check:** [CONFIRM THAT THE MISSION MODEL ABOVE MATCHES THIS SUBMITTED RUN]. Exact assumptions, including customer generation and unavailable-item behaviour, are documented in the website's Model Declaration.
+
+## Inventory and Store Brain
+
+Opening inventory must cost no more than A$40,000. Operating cash starts separately at A$15,000; neither the opening inventory cost nor unused inventory budget changes that opening cash.
+
+The Store Brain uses rules to identify low stock, sold-out products, expiry risk, expired stock and slow-moving inventory. Replenishment considers recent sales, available stock, perishability and cash, with decisions and reasons retained for inspection.
+
+The intended daily cycle is:
+
+1. Receive orders placed at the previous day's close.
+2. Remove stock that has reached expiry and record write-offs.
+3. Process customers and valid sales.
+4. Review closing conditions.
+5. On Days 1–59, place justified affordable orders and deduct cash immediately.
+6. Save the day's results.
+
+Lead time is one day; newly ordered stock is unavailable until the following morning. No order is placed at the end of Day 60 for Day 61.
+
+Perishable stock is tracked by batch so receipts from different days can expire at different times. The proposed engine allocates sales to the oldest unexpired batches first.
+
+Under cash constraints, the proposed brain prioritises urgent needs and reduces or skips unaffordable orders. The exact thresholds, priorities and first-days demand fallback must be stated in the run's Model Declaration and match the code.
+
+**Pricing policy:** [CONFIRM FIXED PRICES, OR DESCRIBE ACTUAL MARKDOWNS AND THEIR RECORDING].
+
+## Where to find the required evidence
+
+The screen names below follow the planned frontend; confirm the labels in the final build.
+
+| Requirement | Application location |
+|---|---|
+| Submitted Run and additional runs | **Setup & Runs** |
+| Opening resources and sample products | **Setup & Runs** and/or **Model Declaration** |
+| Customer, inventory and Store Brain assumptions | **Model Declaration** |
+| Part 1: Business Performance | **60-Day Report**, business totals, shoppers, categories and products |
+| Part 2: Inventory and Autonomous Operations | **60-Day Report**, inventory health, orders and Store Brain responses |
+| Part 3: Commercial Diagnosis and Management Recommendations | **60-Day Report**, three written findings and recommendations |
+| Part 4: Commercial Assurance | **Commercial Assurance** |
+| Any selected day from 1 to 60 | **Daily Reports**, using the day selector |
+| Recorded baskets for a day | **Daily Reports**, transaction evidence control |
+| A product's inventory, orders and events | Product trace opened from the supported product links |
+
+The three findings must each include Observation → Evidence → Diagnosis → Business implication → Recommendation. At least one addresses a problem, anomaly, trade-off or limitation; template wording must be reviewed against the actual run.
+
+For a traceability demonstration, start at a reported product or operational issue, open the relevant Daily Report, inspect the Store Brain event and follow its transaction, inventory or order evidence. Use the same Run ID throughout.
+
+## Commercial Assurance
+
+The Assurance view is intended to calculate checks from stored records rather than merely display a hardcoded PASS label.
+
+- **History:** Identify the run, retain all 60 days and show relevant evidence counts.
+- **Inventory:** Opening + received − sold − expired/written off = closing, with checks for negative stock, overselling and expired sales.
+- **Revenue:** Transaction totals reconcile to each day's revenue, and daily revenue reconciles to the 60-day total.
+- **Cash:** Opening cash + revenue − replenishment spending = closing cash, with orders checked against cash available when placed.
+- **Exceptions:** Display actual PASS/FAIL results and disclose material discrepancies.
+
+Stockouts, expiry, slow-moving stock and low-cash warnings may be valid simulated business outcomes. They are different from integrity failures such as negative stock or unexplained revenue differences.
+
+## AI collaboration
+
+Perplexity was used to assist with assignment interpretation, backend modularisation, simulation and database design, frontend/API alignment, drafting product data, debugging guidance, and documentation and presentation drafts.
+
+A concrete review issue arose during integration: the AI-assisted replacement backend expected `backend/products.json`, but the file was missing. Running the application produced an `ENOENT` error. I reported the runtime error and requested a catalogue rather than treating the generated backend as complete. This led to a separate catalogue draft and clarified the distinction between including the SQLite Submitted Run and supplying JSON input for new runs.
+
+**Final review outcome:** [STATE WHAT YOU ACTUALLY CHANGED OR CHECKED AFTER THIS ERROR, AND THE ACTUAL RESULT. DO NOT CLAIM A SUCCESSFUL SEED OR RUN WITHOUT TESTING IT.]
+
+The AI-generated catalogue requires review of its pack sizes, costs, prices, shelf lives and opening quantities. Generated findings also require review against stored evidence; AI-written diagnoses are not proof of causation.
+
+I remain responsible for understanding the submitted code, reviewing and validating AI-assisted work, selecting model assumptions and ensuring all report claims match the Submitted Run. Fictional video examples are practice material and must not be represented as simulation evidence.
+
+## Known limitations
+
+- **Uncalibrated demand:** Customer volumes and shopping preferences are modelling assumptions, not a validated forecast based on real store data.
+- **Simplified supply:** A fixed one-day lead time does not model supplier delays or delivery uncertainty.
+- **Simplified product assumptions:** Catalogue prices and shelf lives are educational inputs, not verified live market or food-safety data.
+- **Excluded overhead:** Rent, utilities, insurance and other excluded costs are not modelled; gross profit is not full net profit.
+- **Finite horizon:** Results cover 60 simulated days and do not establish long-term business viability.
+- **Template analysis:** Structured findings can help explain evidence but need human review for relevance and justified conclusions.
+- **Local prototype:** The design is for a locally runnable educational system, not a production retail deployment.
+- **Outstanding technical issues:** [LIST ACTUAL UNRESOLVED ISSUES, OR STATE NONE IDENTIFIED AFTER THE DOCUMENTED TESTS].
+
+Passing Assurance supports internal consistency within the checks performed. It does not demonstrate real-world predictive accuracy or prove that a recommendation is optimal.
+
+## Clean-copy verification and packaging
+
+Before submitting, extract a fresh copy of the final ZIP and perform these checks:
+
+- [ ] Run the exact installation/startup commands in this README.
+- [ ] Confirm the Submitted Run loads without seeding.
+- [ ] Confirm its Run ID and 60/60 retained days.
+- [ ] Inspect the Model Declaration and all four acceptance areas.
+- [ ] Open a Daily Report, transactions and product/Store Brain evidence.
+- [ ] Check actual inventory, revenue and cash Assurance results.
+- [ ] Create an additional run and confirm the original history remains intact.
+- [ ] Restart the application and confirm saved evidence persists.
+- [ ] Confirm that no normal workflow edits or deletes completed history.
+- [ ] Replace all README placeholders and remove preparation-only notes.
+
+Include the source, dependency manifests/lockfiles, README, catalogue and SQLite database containing the Submitted Run. Exclude `node_modules`, build output, temporary files and secrets.
+
+Close processes using SQLite before packaging. If `supermarket.db-wal` or `supermarket.db-shm` remains, verify that the database has been safely checkpointed and the main `.db` contains the complete run before omitting these files; do not simply delete a live WAL file.
+
+Submit the source-code ZIP and the required 4–8 minute MP4 directly to the LMS. The website contains the required reports; this README and the video do not replace missing application evidence.
