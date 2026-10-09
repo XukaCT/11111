@@ -7,13 +7,13 @@ A 60-day supermarket simulation with autonomous inventory decisions, persistent 
 **Student ID:** 22261623<br/>
 **Submitted Run ID:** 1
 
-## Purpose and scope
+##1. Purpose and scope
 
 The project models a small autonomous supermarket near Swanston Street and Melbourne Town Hall in Melbourne. It generates customer demand, records valid purchases, tracks stock and expiry, and uses a rule-based Store Brain to place affordable replenishment orders.
 
 The website lets a remote manager inspect one complete 60-day run, its business results, daily operating evidence and integrity checks. It is an educational prototype, not a validated forecast of a real supermarket's performance.
 
-## Technology and prerequisites
+##2. Technology and prerequisites
 
 | Component | Technology |
 |---|---|
@@ -30,7 +30,7 @@ Tested environment:
 
 Use the tested Node.js version above because the SQLite driver includes a native dependency. Install dependencies from each folder's `package.json`; include existing lockfiles in the submission.
 
-## Installation and startup
+##3. Installation and startup
 
 Extract the project ZIP to a local folder. The commands below assume the root contains folders named `backend` and `frontend`; adjust these instructions before submission if the actual names differ.
 
@@ -78,7 +78,7 @@ The frontend connects to the backend and loads the saved Submitted Run. Both pro
 - **SQLite dependency installation fails:** Confirm that Node.js matches the tested version above and inspect the full `npm install` error.
 - **Submitted Run is missing:** Check that the supplied `backend/supermarket.db` was included and is the correct file. Do not delete it or regenerate evidence as a routine startup step.
 
-## Database and simulation runs
+##4. Database and simulation runs
 
 ### Submitted Run
 
@@ -119,7 +119,7 @@ The intended seed script creates a 60-day run, checks its Assurance results and 
 
 This command prepares submission evidence; it is not a required marker installation step. Back up existing databases before maintenance and do not delete or overwrite the final submitted database to rerun a seed command.
 
-## Architecture and data flow
+##5. Architecture and data flow
 
 ```text
 products.json + config.js
@@ -162,7 +162,7 @@ Configuration describes the model. Historical records describe what occurred, wh
 
 Completed-run configuration and historical records are intended to be protected against editing or deletion through normal application workflows. A modelling or implementation change requires a new run, not revision of old evidence.
 
-## Customer and demand model
+##6. Customer and demand model
 
 The proposed model distinguishes commuter, office-lunch, top-up and household shopping missions. Mission mix, basket behaviour, category preferences, time-of-day patterns and weekday/weekend differences create structured demand, with product popularity weights providing further variation.
 
@@ -172,7 +172,7 @@ A stored random seed supports repeatable testing with unchanged inputs and code.
 
 The details of the model, including customer generation and unavailable-item behaviour, are documented in the website's Model Declaration.
 
-## Inventory and Store Brain
+##7. Inventory and Store Brain
 
 Opening inventory must cost no more than A$40,000. Operating cash starts separately at A$15,000; neither the opening inventory cost nor unused inventory budget changes that opening cash.
 
@@ -193,7 +193,7 @@ Perishable stock is tracked by batch so receipts from different days can expire 
 
 Under cash constraints, the proposed brain prioritises urgent needs and reduces or skips unaffordable orders. The exact thresholds, priorities, and first-day demand fallback must be stated in the run's Model Declaration and match the code.
 
-## Where to find the required evidence
+##8. Where to find the required evidence
 
 The screen names below follow the planned frontend; confirm the labels in the final build.
 
@@ -214,7 +214,7 @@ The three findings must each include Observation → Evidence → Diagnosis → 
 
 For a traceability demonstration, start at a reported product or operational issue, open the relevant Daily Report, inspect the Store Brain event and follow its transaction, inventory or order evidence. Use the same Run ID throughout.
 
-## Commercial Assurance
+##9. Commercial Assurance
 
 The Assurance view is intended to calculate checks from stored records rather than merely display a hardcoded PASS label.
 
@@ -226,7 +226,7 @@ The Assurance view is intended to calculate checks from stored records rather th
 
 Stockouts, expiry, slow-moving stock and low-cash warnings may be valid simulated business outcomes. They are different from integrity failures such as negative stock or unexplained revenue differences.
 
-## AI collaboration
+##10. AI collaboration
 
 Gemini was used to assist with backend modularisation, frontend visual fixing, drafting product data, debugging guidance, and documentation and presentation drafts.
 
@@ -236,7 +236,7 @@ A concrete review issue arose during integration: During the initial backend set
 
 The AI-generated catalogue requires review of its pack sizes, costs, prices, shelf lives and opening quantities. Generated findings also require review against stored evidence; AI-written diagnoses are not proof of causation.
 
-## Known limitations
+##11. Known limitations
 
 - **Uncalibrated demand:** Customer volumes and shopping preferences are modelling assumptions, not a validated forecast based on real store data.
 - **Simplified supply:** A fixed one-day lead time does not model supplier delays or delivery uncertainty.
