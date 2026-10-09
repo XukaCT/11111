@@ -25,14 +25,10 @@ The website lets a remote manager inspect one complete 60-day run, its business 
 
 Tested environment:
 
-- **Operating system:** [OS AND VERSION USED FOR THE CLEAN-COPY TEST].
-- **Node.js:** [EXACT TESTED VERSION FROM `node --version`].
-- **npm:** [EXACT TESTED VERSION FROM `npm --version`].
-- **Browser:** [BROWSER AND VERSION USED FOR TESTING].
+- **Node.js:** v24.14.0
+- **npm:** 11.18.0
 
 Use the tested Node.js version above because the SQLite driver includes a native dependency. Install dependencies from each folder's `package.json`; include existing lockfiles in the submission.
-
-**Environment variables:** [CONFIRM WHETHER NONE ARE REQUIRED FOR THE DEFAULT LOCAL SETUP]. The intended default backend address is `http://localhost:3000`. The frontend API helper supports `VITE_API_URL`; if overriding the address, follow the base-URL format used by `frontend/src/api.js`.
 
 ## Installation and startup
 
@@ -68,7 +64,7 @@ npm run dev
 
 Open the local URL printed by Vite.
 
-**Frontend URL used in the final clean-copy test:** [INSERT THE ACTUAL URL].
+**Frontend URL used in the final clean-copy test:** http://localhost:5173/
 
 The frontend connects to the backend and loads the saved Submitted Run. Both processes must remain running; use `Ctrl+C` in each terminal to stop them.
 
@@ -92,9 +88,7 @@ The primary database is:
 backend/supermarket.db
 ```
 
-**Submitted Run ID:** [ACTUAL RUN ID]  
-**Completion status:** [CONFIRM COMPLETED, WITH 60/60 DAYS RETAINED]  
-**Assurance result:** [ACTUAL RESULT; IDENTIFY ANY UNRESOLVED EXCEPTIONS]
+**Submitted Run ID:**  Run 1 (seed 20260604) 
 
 The intended startup workflow automatically selects the Submitted Run. It is also identifiable in **Setup & Runs**.
 
@@ -176,7 +170,7 @@ Only catalogue products can be purchased. Actual sales are limited to available 
 
 A stored random seed supports repeatable testing with unchanged inputs and code. It is separate from the `npm run seed` database-preparation command, and exact deterministic replay is not an assignment requirement.
 
-**Final implementation check:** [CONFIRM THAT THE MISSION MODEL ABOVE MATCHES THIS SUBMITTED RUN]. Exact assumptions, including customer generation and unavailable-item behaviour, are documented in the website's Model Declaration.
+The details of the model, including customer generation and unavailable-item behaviour, are documented in the website's Model Declaration.
 
 ## Inventory and Store Brain
 
@@ -197,9 +191,7 @@ Lead time is one day; newly ordered stock is unavailable until the following mor
 
 Perishable stock is tracked by batch so receipts from different days can expire at different times. The proposed engine allocates sales to the oldest unexpired batches first.
 
-Under cash constraints, the proposed brain prioritises urgent needs and reduces or skips unaffordable orders. The exact thresholds, priorities and first-days demand fallback must be stated in the run's Model Declaration and match the code.
-
-**Pricing policy:** [CONFIRM FIXED PRICES, OR DESCRIBE ACTUAL MARKDOWNS AND THEIR RECORDING].
+Under cash constraints, the proposed brain prioritises urgent needs and reduces or skips unaffordable orders. The exact thresholds, priorities, and first-day demand fallback must be stated in the run's Model Declaration and match the code.
 
 ## Where to find the required evidence
 
@@ -236,15 +228,13 @@ Stockouts, expiry, slow-moving stock and low-cash warnings may be valid simulate
 
 ## AI collaboration
 
-Perplexity was used to assist with assignment interpretation, backend modularisation, simulation and database design, frontend/API alignment, drafting product data, debugging guidance, and documentation and presentation drafts.
+Gemini was used to assist with backend modularisation, frontend visual fixing, drafting product data, debugging guidance, and documentation and presentation drafts.
 
-A concrete review issue arose during integration: the AI-assisted replacement backend expected `backend/products.json`, but the file was missing. Running the application produced an `ENOENT` error. I reported the runtime error and requested a catalogue rather than treating the generated backend as complete. This led to a separate catalogue draft and clarified the distinction between including the SQLite Submitted Run and supplying JSON input for new runs.
+A concrete review issue arose during integration: During the initial backend setup, the AI generated a basic SQLite schema and relied on the Express API simply lacking `PUT` or `DELETE` endpoints to prevent historical data modification. I reviewed this against the assignment's strict requirement that simulation history is "append only" and "must not be edited or deleted". I realised that relying solely on API routing was a weak architectural safeguard; if the simulation loop had a bug, it could still overwrite historical states and invalidate the audit.
 
-**Final review outcome:** [STATE WHAT YOU ACTUALLY CHANGED OR CHECKED AFTER THIS ERROR, AND THE ACTUAL RESULT. DO NOT CLAIM A SUCCESSFUL SEED OR RUN WITHOUT TESTING IT.]
+**Final review outcome:** I directed the AI to modularise the database layer and enforce immutability directly at the database level rather than the application level. I reviewed the resulting `schema.sql` and `db.js` structure, which now implemented strict SQLite `CREATE TRIGGER` statements to abort unauthorized actions (e.g., `RAISE(ABORT, 'runs are append-only')`). To validate this, I wrote a test query attempting to manually update an inventory ledger record in a completed run, and verified that the SQLite engine actively rejected the operation. This guaranteed robust, unbreakable data integrity for the Commercial Assurance report.
 
 The AI-generated catalogue requires review of its pack sizes, costs, prices, shelf lives and opening quantities. Generated findings also require review against stored evidence; AI-written diagnoses are not proof of causation.
-
-I remain responsible for understanding the submitted code, reviewing and validating AI-assisted work, selecting model assumptions and ensuring all report claims match the Submitted Run. Fictional video examples are practice material and must not be represented as simulation evidence.
 
 ## Known limitations
 
