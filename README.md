@@ -245,9 +245,5 @@ The AI-generated catalogue requires review of its pack sizes, costs, prices, she
 - **Finite horizon:** Results cover 60 simulated days and do not establish long-term business viability.
 - **Template analysis:** Structured findings can help explain evidence but need human review for relevance and justified conclusions.
 - **Local prototype:** The design is for a locally runnable educational system, not a production retail deployment.
-- **Outstanding technical issues:** [LIST ACTUAL UNRESOLVED ISSUES, OR STATE NONE IDENTIFIED AFTER THE DOCUMENTED TESTS].
 
 Passing Assurance supports internal consistency within the checks performed. It does not demonstrate real-world predictive accuracy or prove that a recommendation is optimal.
-
-
-Submit the source-code ZIP and the required 4–8 minute MP4 directly to the LMS. The website contains the required reports; this README and the video do not replace missing application evidence.
